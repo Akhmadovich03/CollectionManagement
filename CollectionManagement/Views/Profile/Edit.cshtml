@@ -1,0 +1,158 @@
+﻿@model CollectionManagement.Models.User
+
+<header>
+    <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
+        <div class="d-flex">
+            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.Id})" }">
+                <i class="bi bi-collection"></i>
+                CollectIt
+            </a>
+        </div>
+        <div class="d-flex" id="rightSideHeader">
+            <div class="mt-2 me-2">
+                <ejs-switch id="default" onlabel="UZ" offlabel="EN" cssClass="custom-switch bar-color"></ejs-switch>
+            </div>
+            <div class="mt-2 me-3">
+                @{
+                    var isDarkTheme = Model.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                }
+                <input type="checkbox" class="checkbox" id="checkbox" @(isDarkTheme ? "checked" : "")>
+                <label for="checkbox" class="checkbox-label">
+                    <i class="bi bi-moon"></i>
+                    <i class="bi bi-sun"></i>
+                    <span class="ball"></span>
+                </label>
+            </div>
+            <div class="d-flex me-4">
+                @if (Model.Email is not null)
+                {
+                    <div class="dropdown">
+                        <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @Model.UserName
+                        </a>
+                        <div class="dropdown-menu me-5" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="@Url.ActionLink("Edit", "Profile", new {userId = Model.Id})" }">
+                                <i class="bi bi-gear-fill"></i>
+                                Account
+                            </a>
+                            <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.Id})" }">
+                                <i class="bi bi-person"></i>
+                                Collections
+                            </a>
+                            @if (Model.IsAdmin)
+                            {
+                                <a class="dropdown-item" href="@Url.ActionLink("Index", "Admin", new {userId = Model.Id})" }">
+                                    <i class="bi bi-people"></i>
+                                    Users
+                                </a>
+                            }
+                            <a class="dropdown-item" href="@Url.Action("Index", "Home")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Log out
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="nav-link text-light mt-2" href="@Url.Action("SignUp", "Auth")">Register</a>
+                    <div class="text-light mt-2 me-2 ms-2">
+                        or
+                    </div>
+                    <a class="nav-link text-light mt-2" href="@Url.Action("Index", "Auth")">Sign in</a>
+                }
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container border border-2 rounded-2 shadow" style="margin-top: 70px">
+    <div class="d-flex justify-content-center mt-2 mb-5">
+        <h3>Personal informations</h3>
+    </div>
+    <form id="editForm" method="post">
+        <input type="hidden" name="userId" value="@Model.Id" />
+        <div class="mb-3">
+            <label>Username</label>
+            <input type="text" name="userName" class="form-control" value="@Model.UserName" required />
+        </div>
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" value="@Model.Email" required />
+            <span class="text-danger" id="errorMessage"></span>
+        </div>
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Confirm password</label>
+            <input type="password" name="confirmPassword" class="form-control" />
+            <span class="text-danger" id="errorPasswordMessage"></span>
+        </div>
+        <div class="d-flex justify-content-center mb-4">
+            <button type="submit" class="btn btn-outline-success">
+                <i class="bi bi-floppy-fill"></i>
+                Save changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const html = document.getElementById("htmlPage");
+    const checkbox = document.getElementById("checkbox");
+
+    $(document).ready(function () {
+        var counter = 0;
+        var customFields = {};
+
+        $('#editForm').on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '@Url.Action("Edit", "Profile")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#errorMessage').text('');
+                    $('#errorPasswordMessage').text('');
+
+                    if (response.success) {
+                        alert('Profile updated successfully!');
+                        location.reload(); 
+                    } else {
+                        if (response.errorMessage) {
+                            $('#errorMessage').text(response.errorMessage);
+                        }
+
+                        if (response.errorPasswordMessage) {
+                            $('#errorPasswordMessage').text(response.errorPasswordMessage);
+                        }
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while updating the profile.');
+                }
+            });
+        });
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+    });
+
+    checkbox.addEventListener("change", () => {
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+
+        $.ajax({
+            url: '/UserPreference/EditTheme',
+            type: 'POST',
+            data: { theme: theme, userId: '@Model.Id' },
+            success: function (response) {
+                console.log('Theme preference updated successfully.');
+            },
+            error: function () {
+                console.error('Failed to update theme preference.');
+            }
+        });
+    });
+</script>

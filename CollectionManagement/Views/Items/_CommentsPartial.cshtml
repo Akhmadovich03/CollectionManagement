@@ -1,0 +1,13 @@
+﻿@model List<Comment>
+
+@foreach (var comment in Model)
+{
+    <div class="container border border-2 rounded-4 mt-2">
+        <div class="fw-bolder" style="font-size: small;">
+            @comment.User.UserName
+        </div>
+        <div style="font-size: smaller;">
+            <textarea class="w-100 ms-1 border-0" rows="1" readonly>@comment.Content</textarea>
+        </div>
+    </div>
+}

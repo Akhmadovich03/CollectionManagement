@@ -1,0 +1,129 @@
+﻿@model (CollectionManagement.Models.User User, CollectionManagement.Models.Collection Collection)
+@using Newtonsoft.Json.Linq
+
+<header>
+    <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
+        <div class="d-flex">
+            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.User.Id})" }">
+                <i class="bi bi-collection"></i>
+                CollectIt
+            </a>
+        </div>
+        <div class="d-flex" id="rightSideHeader">
+            <div class="mt-2 me-2">
+                <ejs-switch id="default" onlabel="UZ" offlabel="EN" cssClass="custom-switch bar-color"></ejs-switch>
+            </div>
+            <div class="mt-2 me-3">
+                @{
+                    var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                }
+                <input type="checkbox" class="checkbox" id="checkbox" @(isDarkTheme ? "checked" : "")>
+                <label for="checkbox" class="checkbox-label">
+                    <i class="bi bi-moon"></i>
+                    <i class="bi bi-sun"></i>
+                    <span class="ball"></span>
+                </label>
+            </div>
+            <div class="d-flex me-4">
+                <div class="dropdown">
+                    <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        @Model.User.UserName
+                    </a>
+                    <div class="dropdown-menu me-5" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.User.Id})" }">
+                            <i class="bi bi-person"></i>
+                            Profile
+                        </a>
+                        <a class="dropdown-item" href="@Url.Action("Index", "Home")">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Log out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div style="margin-top: 70px" class="d-flex justify-content-center">
+    <h4>Are you sure you want to delete this?</h4>
+</div>
+
+@{
+    var customFields = !string.IsNullOrEmpty(Model.Collection.CustomFields)
+        ? JObject.Parse(Model.Collection.CustomFields)
+        : null;
+}
+
+
+<div class="container border border-2 rounded-2 shadow mt-3">
+    <div class="mb-3">
+        <label>Name</label>
+        <input type="text" value="@Model.Collection.Name" class="form-control" readonly />
+    </div>
+    <div class="mb-3">
+        <label>Category</label>
+        <input type="text" value="@Model.Collection.Category.ToString()" class="form-control" readonly />
+    </div>
+    @if (customFields != null)
+    {
+        @foreach (var field in customFields)
+        {
+            <div class="mb-3">
+                <label class="w-25">@field.Key</label>
+                <input type="text" value="@field.Value" class="form-control" readonly />
+            </div>
+        }
+    }
+    <div class="mb-3">
+        <label>Description</label>
+        <input type="text" value="@Model.Collection.Description" class="form-control" readonly />
+    </div>
+    <div class="mb-3">
+        <label>Number of items</label>
+        <input type="number" value="@Model.Collection.Items.Count()" class="form-control" readonly />
+    </div>
+    <div class="mb-3">
+        <label>Created at</label>
+        <input type="datetime" value="@Model.Collection.CreatedAt" class="form-control" readonly />
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+        <a href="@Url.Action("Index", "Profile", new {userId = Model.User.Id})" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i>
+            My Collections
+        </a>
+        <form action="@Url.Action("Delete", "Collections", new { collectionId = Model.Collection.Id, userId = Model.User.Id })" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash3-fill me-2"></i>
+                Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const html = document.getElementById("htmlPage");
+    const checkbox = document.getElementById("checkbox");
+
+    $(document).ready(function () {
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+    });
+
+    checkbox.addEventListener("change", () => {
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+
+        $.ajax({
+            url: '/UserPreference/EditTheme',
+            type: 'POST',
+            data: { theme: theme, userId: '@Model.User.Id' },
+            success: function (response) {
+                console.log('Theme preference updated successfully.');
+            },
+            error: function () {
+                console.error('Failed to update theme preference.');
+            }
+        });
+    });
+</script>

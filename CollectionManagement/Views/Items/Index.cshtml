@@ -1,0 +1,325 @@
+﻿@model CollectionManagement.Models.ViewModels.ItemsPageViewModel
+
+<header>
+    <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
+        <div class="d-flex">
+            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.User!.Id})" }">
+                <i class="bi bi-collection"></i>
+                CollectIt
+            </a>
+            <form class="d-flex ms-5" action="@Url.Action("Index", "Items")">
+                <input type="hidden" name="collectionId" value="@Model.Collection.Id" />
+                <input type="hidden" name="userId" value="@Model.User.Id" />
+                <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search" value="@ViewBag.Search">
+                <button class="btn btn-outline-light" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="d-flex" id="rightSideHeader">
+            <div class="mt-2 me-2">
+                <ejs-switch id="default" onlabel="UZ" offlabel="EN" cssClass="custom-switch bar-color"></ejs-switch>
+            </div>
+            <div class="mt-2 me-3">
+                @{
+                    var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                }
+                <input type="checkbox" class="checkbox" id="checkbox" @(isDarkTheme ? "checked" : "")>
+                <label for="checkbox" class="checkbox-label">
+                    <i class="bi bi-moon"></i>
+                    <i class="bi bi-sun"></i>
+                    <span class="ball"></span>
+                </label>
+            </div>
+            <div class="d-flex me-4">
+                @if (Model.User.Email is not null)
+                {
+                    <div class="dropdown">
+                        <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @Model.User.UserName
+                        </a>
+                        <div class="dropdown-menu me-5" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="@Url.ActionLink("Edit", "Profile", new {userId = Model.User.Id})" }">
+                                <i class="bi bi-gear-fill"></i>
+                                Account
+                            </a>
+                            <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.User.Id})" }">
+                                <i class="bi bi-person"></i>
+                                Collections
+                            </a>
+                            @if (Model.User.IsAdmin)
+                            {
+                                <a class="dropdown-item" href="@Url.ActionLink("Index", "Admin", new {userId = Model.User.Id})" }">
+                                    <i class="bi bi-people"></i>
+                                    Users
+                                </a>
+                            }
+                            <a class="dropdown-item" href="@Url.Action("Index", "Home")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Log out
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="nav-link text-light mt-2" href="@Url.Action("SignUp", "Auth")">Register</a>
+                    <div class="text-light mt-2 me-2 ms-2">
+                        or
+                    </div>
+                    <a class="nav-link text-light mt-2" href="@Url.Action("Index", "Auth")">Sign in</a>
+                }
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="row mb-3" style="margin-top: 70px">
+    <div class="col-md-auto">
+        @if (Model.User.Id == Model.Collection.UserId)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", "Profile", new {userId = Model.User.Id})">
+                <i class="bi bi-arrow-left me-2"></i>
+                My Collections
+            </a>
+        }
+        else
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", "Home", new {userId = Model.User.Id})">
+                <i class="bi bi-arrow-left me-2"></i>
+                Main Menu
+            </a>
+        }
+    </div>
+    <div class="col d-flex justify-content-center align-items-center">
+        <h2>@Model.Collection.Name collection</h2>
+    </div>
+    <div class="col col-lg-2"></div>
+</div>
+@if (!Model.Items.Any())
+{
+    <h5>There are not items yet</h5>
+    
+    if (Model.User.Id == Model.Collection.UserId)
+    {
+        <h5>Click "+" to add item to this collection</h5>
+    }
+}
+else
+{
+    <table class="table table-striped table-bordered table-hover text-center">
+        <thead class="thead-dark">
+            <tr>
+                @if(Model.User.IsAdmin)
+                {
+                    <th scope="col">Id</th>
+                }
+                <th scope="col">Name</th>
+                <th scope="col">Created at</th>
+                <th scope="col">Likes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr data-href="@Url.Action("Details", "Items", new { itemId = item.Id, userId = Model.User.Id })" class="clickable-row">
+                    @if(Model.User.IsAdmin)
+                    {
+                        <th scope="row">@item.Id</th>
+                    }
+                    <td>@item.Name</td>
+                    <td>@item.CreatedAt</td>
+                    <td>
+                        <label class="form-label m-1 text-danger" id="labelForLike-@item.Id">
+                            <input type="checkbox" class="form-control d-none like-checkbox" id="like-@item.Id" data-item-id="@item.Id" @(item.IsUserLiked ? "checked" : "") />
+                            @if (item.IsUserLiked)
+                            {
+                                <i class="bi bi-heart-fill"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-heart"></i>
+                            }
+                        </label>
+                        <span class="like-count">@item.LikesCount</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if(Model.User.Id == Model.Collection.UserId || Model.User.IsAdmin)
+{
+    <div class="add-button-footer">
+        <div class="circle-button">
+            <a data-toggle="modal" id="addingItem" data-target="#exampleModal">
+                <i class="bi bi-plus text-secondary"></i>
+                <span class="hint">Add Item</span>
+            </a>
+        </div>
+    </div>
+}
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Create" method="post" id="formBlock" enctype="multipart/form-data">
+                    <input type="hidden" name="collectionId" value="@Model.Collection.Id" />
+                    <input type="hidden" id="customFieldsData" name="customFieldsData" />
+                    <input type="hidden" name="userId" value="@Model.User.Id" />
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" name="name" id="name" required />
+                    </div>
+                    <div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#customFieldsModal">
+                            <i class="bi bi-plus"></i>
+                            Add Property
+                        </button>
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-floppy"></i>
+                            Save changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bg bg-secondary" id="customFieldsModal" tabindex="-1" role="dialog" aria-labelledby="customFieldsModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">New Property</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>Property Name</label>
+                        <input type="text" class="form-control" id="customName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <textarea class="form-control" id="customValue"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-success" id="saveCustomField" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var userEmail = '@(Model.User.Email ?? "")';
+    var counter = 0;
+    var customFields = {};
+    const html = document.getElementById("htmlPage");
+    const checkbox = document.getElementById("checkbox");
+
+    $(document).ready(function () {
+        $('#saveCustomField').on('click', function (e) {
+            const propName = $("#customName").val();
+            const propValue = $("#customValue").val();
+
+            if (propName && propValue) {
+                customFields[propName] = propValue;
+                const divBody = $("#formBlock div").eq(1);
+                const propValueId = "customPropValue" + counter;
+                counter += 1;
+
+                divBody.append(`
+                            <div class="form-group">
+                                <label>${propName}</label>
+                                <textarea class="form-control" id="${propValueId}" readonly>${propValue}</textarea>
+                            </div>
+                        `);
+                console.log(propName);
+                $("#customName").val('');
+                $("#customValue").val('');
+            }
+        });
+
+        $('form').on('submit', function () {
+            const customFieldsData = JSON.stringify(customFields);
+
+            $('#customFieldsData').val(customFieldsData);
+        });
+
+        $(document).on('click', '.clickable-row', function (e) {
+            if (!$(e.target).closest('.like-checkbox').length && !$(e.target).closest('label').length) {
+                window.location = $(this).data('href');
+            }
+        });
+
+        $(document).on('change', '.like-checkbox', function (e) {
+            e.stopPropagation();
+
+            var isChecked = $(this).is(':checked');
+            var itemId = $(this).data('item-id');
+            var userId = '@Model.User.Id';
+            var $checkbox = $(this);
+
+            if (userId == 0) {
+                alert('You need to sign in first.');
+                return;
+            }
+
+            var likeCountLabel = $(this).closest('tr').find('.like-count');
+
+            $.ajax({
+                url: '@Url.Action("ToggleLike", "Items")',
+                type: 'POST',
+                data: { itemId: itemId, userId: userId, isLiked: isChecked },
+                success: function (response) {
+                    if (response.success) {
+                        if (isChecked) {
+                            $checkbox.siblings('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                        } else {
+                            $checkbox.siblings('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                        }
+                        likeCountLabel.text(response.likesCount);
+                    } else {
+                        alert('Error updating like status.');
+                    }
+                },
+                error: function () {
+                    alert('Failed to update like status.');
+                }
+            });
+        });
+
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+    });
+
+    checkbox.addEventListener("change", () => {
+        const theme = checkbox.checked ? "Dark" : "Light";
+        html.setAttribute("data-bs-theme", theme.toLowerCase());
+
+        $.ajax({
+            url: '/UserPreference/EditTheme',
+            type: 'POST',
+            data: { theme: theme, userId: '@Model.User.Id' },
+            success: function (response) {
+                console.log('Theme preference updated successfully.');
+            },
+            error: function () {
+                console.error('Failed to update theme preference.');
+            }
+        });
+    });
+</script>

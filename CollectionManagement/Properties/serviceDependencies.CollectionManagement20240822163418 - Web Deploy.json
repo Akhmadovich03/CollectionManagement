@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/CollectionManagement20240822163418/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsAppConnectionString_4BF3A97FC6",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/collectionappserver/databases/collectionAppDB",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:AppConnectionString",
+      "dynamicId": null
+    },
+    "signalr1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/CollectionManagement20240822163418/providers/Microsoft.ServiceLinker/linkers/AzureSignalRConnectionString_22FF67BD4E",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.SignalRService/SignalR/collectionappsignalr",
+      "type": "signalr.azure",
+      "connectionId": "Azure:SignalR:ConnectionString",
+      "dynamicId": null
+    },
+    "storage1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/CollectionManagement20240822163418/providers/Microsoft.ServiceLinker/linkers/AzureBlobStorageConnectionString_EA719D6AD6, /subscriptions/7581c2cd-bf96-4cdb-a372-f7a05d0db403/resourceGroups/CollectionApp/providers/Microsoft.Web/sites/CollectionManagement20240822163418/providers/Microsoft.ServiceLinker/linkers/AzureBlobStorageConnectionString_5240B42C19",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/imagesforcollection",
+      "type": "storage.azure",
+      "connectionId": "Azure:BlobStorage:ConnectionString",
+      "dynamicId": null
+    }
+  }
+}
