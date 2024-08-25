@@ -82,7 +82,7 @@ public class CollectionsController : Controller
         return (user!, collection!);
     }
 
-    public async Task<IActionResult> Delete(int collectionId, int userId)
+    public async Task<IActionResult> DeleteView(int collectionId, int userId)
     {
         var model = await TakingDatasForView(collectionId, userId);
 
@@ -90,15 +90,15 @@ public class CollectionsController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Delete((int collectionId, int userId) model)
+    public async Task<IActionResult> Delete(int collectionId, int userId)
     {
         var collection = await _context.Collections
-            .FirstOrDefaultAsync(c => c.Id == model.collectionId);
+            .FirstOrDefaultAsync(c => c.Id == collectionId);
 
         _context.Remove(collection!);
         await _context.SaveChangesAsync();
 
-        return RedirectToAction("Index", "Profile", new { model.userId });
+        return RedirectToAction("Index", "Profile", new { userId });
     }
 
     public async Task<IActionResult> Edit(int collectionId, int userId)
