@@ -53,14 +53,21 @@ public class ItemsController : Controller
 
         var collection = await _context.Collections.FirstOrDefaultAsync(c => c.Id == collectionId);
 
+        var usersCollections = await _context.Collections
+            .Where(c => c.Id == collectionId)
+            .Select(c => c.Name)
+            .ToListAsync();
+
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
+        ViewBag.Search = search;
+
         var viewModel = new ItemsPageViewModel()
         {
             Collection = collection!,
             Items = items,
             User = user
         };
-
-        ViewBag.Search = search;
 
         return View(model: viewModel);
     }
@@ -140,6 +147,10 @@ public class ItemsController : Controller
 
         string? temp = item!.CustomFieldsData;
 
+        var usersCollections = new List<Collection>() { item.Collection };
+
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
         ViewBag.Search = search;
 
         return View(model: (user, item, comments));

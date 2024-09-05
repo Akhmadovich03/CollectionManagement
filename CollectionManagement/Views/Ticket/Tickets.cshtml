@@ -1,20 +1,20 @@
-﻿@model CollectionManagement.Models.User
+﻿@model CollectionManagement.Models.ViewModels.TicketsViewModel
 @{
-    ViewData["Title"] = "Edit profile";
+    ViewData["Title"] = "Tickets";
 }
 
 <header>
     <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
         <div class="d-flex">
-            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.Id})" }">
+            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.User.Id})" }">
                 <i class="bi bi-collection"></i>
                 CollectIt
             </a>
         </div>
         <div class="d-flex" id="rightSideHeader">
             @{
-                var isDarkTheme = Model.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
-                var isUzbekLanguage = Model.PageLanguage == CollectionManagement.Models.Enums.Language.Uzbek;
+                var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                var isUzbekLanguage = Model.User.PageLanguage == CollectionManagement.Models.Enums.Language.Uzbek;
             }
             <label class="form-check-label text-light mt-2 me-2">UZ</label>
             <div class="mt-2 me-4">
@@ -32,24 +32,28 @@
                 </label>
             </div>
             <div class="d-flex me-4">
-                @if (Model.Email is not null)
+                @if (Model.User.Email is not null)
                 {
                     <div class="dropdown me-3">
                         <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            @Model.UserName
+                            @Model.User.UserName
                         </a>
                         <div class="dropdown-menu me-5" aria-labelledby="dropdownMenuLink">
-                            <a class="dropdown-item" href="@Url.ActionLink("Edit", "Profile", new {userId = Model.Id})" }">
-                                <i class="bi bi-gear-fill"></i>
+                            <a class="dropdown-item" href="@Url.ActionLink("Edit", "Profile", new {userId = Model.User.Id})" }">
+                                <i class="bi bi-gear"></i>
                                 Account
                             </a>
-                            <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.Id})" }">
+                            <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.User.Id})" }">
                                 <i class="bi bi-person"></i>
                                 Collections
                             </a>
-                            @if (Model.IsAdmin)
+                            <a class="dropdown-item" href="@Url.ActionLink("Tickets", "Ticket", new {userId = Model.User.Id})" }">
+                                <i class="bi bi-ticket-perforated"></i>
+                                Tickets
+                            </a>
+                            @if (Model.User.IsAdmin)
                             {
-                                <a class="dropdown-item" href="@Url.ActionLink("Index", "Admin", new {userId = Model.Id})" }">
+                                <a class="dropdown-item" href="@Url.ActionLink("Index", "Admin", new {userId = Model.User.Id})" }">
                                     <i class="bi bi-people"></i>
                                     Users
                                 </a>
@@ -73,76 +77,30 @@
         </div>
     </nav>
 </header>
-<div class="container border border-2 rounded-2 shadow" style="margin-top: 70px">
-    <div class="d-flex justify-content-center mt-2 mb-5">
-        <h3>Personal informations</h3>
-    </div>
-    <form id="editForm" method="post">
-        <input type="hidden" name="userId" value="@Model.Id" />
-        <div class="mb-3">
-            <label>Username</label>
-            <input type="text" name="userName" class="form-control" value="@Model.UserName" required />
-        </div>
-        <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control" value="@Model.Email" required />
-            <span class="text-danger" id="errorMessage"></span>
-        </div>
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label>Confirm password</label>
-            <input type="password" name="confirmPassword" class="form-control" />
-            <span class="text-danger" id="errorPasswordMessage"></span>
-        </div>
-        <div class="d-flex justify-content-center mb-4">
-            <button type="submit" class="btn btn-outline-success">
-                <i class="bi bi-floppy-fill"></i>
-                Save changes
-            </button>
-        </div>
-    </form>
+
+<div style="margin-top: 70px">
+    <ejs-grid id="TicketGrid" dataSource="@Model.Tickets" allowPaging="true" allowSorting="true" rowSelected="onRowSelected">
+        <e-grid-columns>
+            <e-grid-column field="Key" headerText="Ticket Key" textAlign="Left" width="80"></e-grid-column>
+            <e-grid-column field="Summary" headerText="Title" textAlign="Left" width="200"></e-grid-column>
+            <e-grid-column field="Priority" headerText="Priority" textAlign="Left" width="80"></e-grid-column>
+            <e-grid-column field="Collection" headerText="Collection" textAlign="Left" width="200"></e-grid-column>
+            <e-grid-column field="Status" headerText="Status" textAlign="Left" width="150"></e-grid-column>
+        </e-grid-columns>
+    </ejs-grid>
 </div>
+
+<a class="btn btn-outline-secondary mt-5" href="@Url.Action("Index", "Home", new {userId = Model.User.Id})" }">
+    <i class="bi bi-arrow-left me-1"></i>
+    Main menu
+</a>
 
 <script>
     const html = document.getElementById("htmlPage");
     const checkbox = document.getElementById("checkbox");
 
+
     $(document).ready(function () {
-        var counter = 0;
-        var customFields = {};
-
-        $('#editForm').on('submit', function (e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: '@Url.Action("Edit", "Profile")',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function (response) {
-                    $('#errorMessage').text('');
-                    $('#errorPasswordMessage').text('');
-
-                    if (response.success) {
-                        alert('Profile updated successfully!');
-                        location.reload(); 
-                    } else {
-                        if (response.errorMessage) {
-                            $('#errorMessage').text(response.errorMessage);
-                        }
-
-                        if (response.errorPasswordMessage) {
-                            $('#errorPasswordMessage').text(response.errorPasswordMessage);
-                        }
-                    }
-                },
-                error: function () {
-                    alert('An error occurred while updating the profile.');
-                }
-            });
-        });
         const theme = checkbox.checked ? "Dark" : "Light";
         html.setAttribute("data-bs-theme", theme.toLowerCase());
     });
@@ -154,7 +112,7 @@
         $.ajax({
             url: '/UserPreference/EditLanguage',
             type: 'POST',
-            data: { language: language, userId: '@Model.Id' },
+            data: { language: language, userId: '@Model.User.Id' },
             success: function (response) {
                 if (response.success) {
                     location.reload();
@@ -175,7 +133,7 @@
         $.ajax({
             url: '/UserPreference/EditTheme',
             type: 'POST',
-            data: { theme: theme, userId: '@Model.Id' },
+            data: { theme: theme, userId: '@Model.User.Id' },
             success: function (response) {
                 console.log('Theme preference updated successfully.');
             },
@@ -184,4 +142,14 @@
             }
         });
     });
+
+    function onRowSelected(args) {
+        var selectedRecord = args.data;
+
+        var ticketUrl = selectedRecord.TicketURL;
+
+        if (ticketUrl) {
+            window.location.href = ticketUrl;
+        }
+    }
 </script>

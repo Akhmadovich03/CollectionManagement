@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Localized strings for Index view in en-US -->
+  <data name="Motto" xml:space="preserve">
+    <value>UniTo'pla</value>
+  </data>
+  <data name="Placeholder" xml:space="preserve">
+    <value>Qidiruv</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Hisob</value>
+  </data>
+  <data name="Collections" xml:space="preserve">
+    <value>To'plamlar</value>
+  </data>
+  <data name="Tickets" xml:space="preserve">
+    <value>Chiptalar</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Foydalanuvchilar</value>
+  </data>
+  <data name="Log out" xml:space="preserve">
+    <value>Chiqish</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Ro'yxatdan o'tish</value>
+  </data>
+  <data name="or" xml:space="preserve">
+    <value>yoki</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Kirish</value>
+  </data>
+  <data name="homeItems" xml:space="preserve">
+    <value>Yaqinda qo'shilgan elementlar</value>
+  </data>
+  <data name="homeNoItems" xml:space="preserve">
+    <value>Hali elementlar yo'q</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nomi</value>
+  </data>
+  <data name="Collection" xml:space="preserve">
+    <value>To'plam</value>
+  </data>
+  <data name="Created at" xml:space="preserve">
+    <value>Yaratilgan vaqti</value>
+  </data>
+  <data name="Likes" xml:space="preserve">
+    <value>Yoqtirganlar</value>
+  </data>
+  <data name="homeCollections" xml:space="preserve">
+    <value>Eng katta to'plamlar</value>
+  </data>
+  <data name="items" xml:space="preserve">
+    <value>elementlar</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Tahrirlash</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>O'chirish</value>
+  </data>
+  <data name="createTicket" xml:space="preserve">
+    <value>Yordam chiptasini yaratish</value>
+  </data>
+</root>

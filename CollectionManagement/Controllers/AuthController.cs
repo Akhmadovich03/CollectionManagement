@@ -12,6 +12,7 @@ public class AuthController(CollectionDbContext context) : Controller
 
     public IActionResult Index(string? message = null)
     {
+        ViewBag.Collections = new List<Collection>();
         return View(model: message);
     }
 
@@ -36,6 +37,7 @@ public class AuthController(CollectionDbContext context) : Controller
 
     public IActionResult ChangingPassword()
     {
+        ViewBag.Collections = new List<Collection>();
         return View();
     }
 
@@ -72,6 +74,7 @@ public class AuthController(CollectionDbContext context) : Controller
 
     public IActionResult SignUp()
     {
+        ViewBag.Collections = new List<Collection>();
         return View();
     }
 

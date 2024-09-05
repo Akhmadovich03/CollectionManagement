@@ -85,6 +85,13 @@ public class CollectionsController : Controller
     public async Task<IActionResult> DeleteView(int collectionId, int userId)
     {
         var model = await TakingDatasForView(collectionId, userId);
+        var usersCollections = await _context.Collections
+            .Where(c => c.Id == collectionId)
+            .Select(c => c.Name)
+            .ToListAsync();
+
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = model.Item1.Email;
 
         return View(model: model);
     }
@@ -104,7 +111,13 @@ public class CollectionsController : Controller
     public async Task<IActionResult> Edit(int collectionId, int userId)
     {
         var model = await TakingDatasForView(collectionId, userId);
+        var usersCollections = await _context.Collections
+            .Where(c => c.Id == collectionId)
+            .Select(c => c.Name)
+            .ToListAsync();
 
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = model.Item1.Email;
         ViewBag.Categories = Enum.GetNames<Category>();
 
         return View(model: model);
@@ -134,8 +147,10 @@ public class CollectionsController : Controller
         
         customFields.Remove("collectionId");
         customFields.Remove("name");
-        customFields.Remove("collectionId");
+        customFields.Remove("userId");
         customFields.Remove("description");
+        customFields.Remove("category");
+        customFields.Remove("imageFile");
         
         string newCustomFields = JsonConvert.SerializeObject(customFields);
 

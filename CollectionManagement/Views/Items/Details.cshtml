@@ -1,5 +1,8 @@
 ﻿@model (CollectionManagement.Models.User User, CollectionManagement.Models.Item Item, List<CollectionManagement.Models.Comment> comments)
 @using Newtonsoft.Json.Linq
+@{
+    ViewData["Title"] = "Details";
+}
 
 <header>
     <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
@@ -18,13 +21,18 @@
             </form>
         </div>
         <div class="d-flex" id="rightSideHeader">
-            <div class="mt-2 me-2">
-                <ejs-switch id="default" onlabel="UZ" offlabel="EN" cssClass="custom-switch bar-color"></ejs-switch>
+            @{
+                var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                var isUzbekLanguage = Model.User.PageLanguage == CollectionManagement.Models.Enums.Language.Uzbek;
+            }
+            <label class="form-check-label text-light mt-2 me-2">UZ</label>
+            <div class="mt-2 me-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="localizer" @(isUzbekLanguage ? "" : "checked")>
+                    <label class="form-check-label text-light">EN</label>
+                </div>
             </div>
             <div class="mt-2 me-3">
-                @{
-                    var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
-                }
                 <input type="checkbox" class="checkbox" id="checkbox" @(isDarkTheme ? "checked" : "")>
                 <label for="checkbox" class="checkbox-label">
                     <i class="bi bi-moon"></i>
@@ -35,7 +43,7 @@
             <div class="d-flex me-4">
                 @if (Model.User.Email is not null)
                 {
-                    <div class="dropdown">
+                    <div class="dropdown me-3">
                         <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             @Model.User.UserName
                         </a>
@@ -255,6 +263,27 @@
 
         const theme = checkbox.checked ? "Dark" : "Light";
         html.setAttribute("data-bs-theme", theme.toLowerCase());
+    });
+
+    const localizer = document.getElementById("localizer");
+    localizer.addEventListener('change', () => {
+        const language = localizer.checked ? "English" : "Uzbek";
+
+        $.ajax({
+            url: '/UserPreference/EditLanguage',
+            type: 'POST',
+            data: { language: language, userId: '@Model.User.Id' },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    console.error('Failed to update language preference.');
+                }
+            },
+            error: function () {
+                console.error('Failed to update language preference.');
+            }
+        });
     });
 
     checkbox.addEventListener("change", () => {

@@ -1,7 +1,6 @@
 ﻿using CollectionManagement.Data;
 using CollectionManagement.Models;
 using CollectionManagement.Models.Enums;
-using CollectionManagement.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static CollectionManagement.Others.SHA3_256;
@@ -31,8 +30,8 @@ public class ProfileController : Controller
         if (search is not null)
         {
             query = query.Where(c => c.Name.Contains(search)
-                                || (c.Description != null && c.Description.Contains(search))
-                                || (c.CustomFields != null && c.CustomFields.Contains(search)));
+                            || (c.Description != null && c.Description.Contains(search))
+                            || (c.CustomFields != null && c.CustomFields.Contains(search)));
         }
 
         var collections = await query
@@ -41,16 +40,30 @@ public class ProfileController : Controller
             .ToListAsync();
 
         var users = await _context.Users.ToListAsync();
+        
+        var usersCollections = await _context.Collections
+            .Where(c => c.UserId == userId)
+            .Select(c => c.Name)
+            .ToListAsync();
 
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
         ViewBag.Categories = Enum.GetNames<Category>();
         ViewBag.Search = search;
 
-        return View(model:  (user, collections, users));
+        return View(model: (user, collections, users));
     }
 
     public async Task<IActionResult> Edit(int userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var usersCollections = await _context.Collections
+            .Where(c => c.UserId == userId)
+            .Select(c => c.Name)
+            .ToListAsync();
+
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
 
         return View(model: user);
     }

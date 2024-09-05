@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CollectIt</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CollectionManagement.styles.css" asp-append-version="true" />
@@ -21,6 +21,10 @@
         .form-control[readonly] {
             background-color: gray; 
             border-color: #adb5bd; 
+        }
+
+        body {
+            margin-bottom: 60px; /* Adjust the height based on your footer's height */
         }
 
         .login-container {
@@ -43,7 +47,7 @@
         .add-button-footer {
             position: absolute;
             right: 70px;
-            bottom: 20px;
+            bottom: 50px;
             float: none;
             height: 50px;
             z-index: 985;
@@ -149,10 +153,12 @@
             background-color: white; 
             z-index: 10; 
         }
-        </style>
+    </style>
 
 </head>
 <body>
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <div class="container">
@@ -160,6 +166,136 @@
             @RenderBody()
         </main>
     </div>
+
+    @{
+        string? title = ViewData["Title"]!.ToString();
+    }
+
+    @if (title != "Changing Password" && title != "Login" && title != "Sign Up")
+    {
+        <footer class="navbar bg-white fixed-bottom border-top box-shadow pe-3 justify-content-between">
+            <div id="divForMessage" class="ms-5"></div>
+            <a class="nav-link pe-auto" href="#" data-toggle="modal" id="addingSupportTicket" data-target="#ticketModal">
+                <i class="bi bi-ticket-perforated me-2"></i>
+                Create support ticket
+            </a>
+        </footer>
+    }
+
+    <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supportTicketModalTitle">Add support ticket on Jira</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createTicketForm">
+                        <div class="form-group">
+                            <label for="summary">Title</label>
+                            <input type="text" class="form-control" id="summary" name="summary">
+                        </div>
+                        <div class="form-group">
+                            <label for="reported">Author</label>
+                            <input type="text" class="form-control" id="reported" name="reported" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="collection">Collection</label>
+                            <select class="form-control" id="collection" name="collection">
+                                @foreach(var collection in ViewBag.Collections)
+                                {
+                                    <option value="@collection">@collection</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="link">Link</label>
+                            <input type="text" class="form-control" id="link" name="link" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select class="form-control" id="priority" name="priority">
+                                <option value="Highest">Highest</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                                <option value="Lowest">Lowest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="backlog">Backlog</option>
+                                <option value="selectedForDevelopment">Selected for Development</option>
+                                <option value="inProgress">In Progress</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end align-items-end">
+                            <button class="btn btn-outline-primary" type="submit">Create Ticket</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const supportTicketBtn = document.getElementById("addingSupportTicket");
+            const currentUser = '@ViewBag.UserEmail';
+
+            $('#addingSupportTicket').on('click', function (event) {
+                if (!currentUser) {
+                    alert("You should sign in first");
+                    event.stopImmediatePropagation();
+                    
+                    return;
+                }
+
+                var modal = $('#ticketModal');
+                var currentLink = window.location.href;
+
+                modal.find('#reported').val(currentUser);
+                modal.find('#link').val(currentLink);
+            });
+
+            $('#createTicketForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const formData = {
+                    summary: $('#summary').val(),
+                    reported: $('#reported').val(),
+                    collection: $('#collection').val(),
+                    link: $('#link').val(),
+                    priority: $('#priority').val(),
+                    status: $('#status').val()
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/Ticket/CreateTicket',  
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        if (response.success) {
+                            alert("Ticket created successfully");
+                            $('#divForMessage').html(response.message);
+                        } else {
+                            $('#divForMessage').html("Ticket creation failed. Please try again.");
+                        }
+                        $('#ticketModal').modal('hide');
+                    },
+                    error: function () {
+                        alert("An error occurred while creating the ticket. Please try again later.");
+                        $('#ticketModal').modal('hide');
+                    }
+                });
+            });
+        });
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

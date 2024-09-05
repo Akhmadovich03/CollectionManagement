@@ -2,9 +2,14 @@ using CollectionManagement.Data;
 using CollectionManagement.Models;
 using CollectionManagement.Models.Enums;
 using CollectionManagement.Models.ViewModels;
+using CollectionManagement.Others;
 using CollectionManagement.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Text;
+using static CollectionManagement.Models.Constants;
 
 namespace CollectionManagement.Controllers;
 
@@ -18,7 +23,6 @@ public class HomeController : Controller
         _context = context;
         _blobService = blobService;
     }
-
 
     public async Task<IActionResult> Index(int userId, string? search)
     {
@@ -62,14 +66,21 @@ public class HomeController : Controller
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync();
 
+        var usersCollections = await _context.Collections
+            .Where(c => c.UserId == userId)
+            .Select(c => c.Name)
+            .ToListAsync();
+
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
+        ViewBag.Search = search;
+
         MainPageViewModel viewModel = new()
         {
             SignedInUser = user,
             Collections = collections,
             Items = items
         };
-
-        ViewBag.Search = search;
 
         return View(model: viewModel);
     }

@@ -1,22 +1,30 @@
 ﻿@model (CollectionManagement.Models.User User, CollectionManagement.Models.Collection Collection)
 @using Newtonsoft.Json.Linq
+@{
+    ViewData["Title"] = "Edit";
+}
 
 <header>
     <nav class="navbar fixed-top navbar-dark bg-secondary box-shadow justify-content-between">
         <div class="d-flex">
-            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.User.Id})" }">
+            <a class="navbar-brand text-light ms-3" href="@Url.ActionLink("Index", "Home", new {userId = Model.User!.Id})" }">
                 <i class="bi bi-collection"></i>
                 CollectIt
             </a>
         </div>
         <div class="d-flex" id="rightSideHeader">
-            <div class="mt-2 me-2">
-                <ejs-switch id="default" onlabel="UZ" offlabel="EN" cssClass="custom-switch bar-color"></ejs-switch>
+            @{
+                var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
+                var isUzbekLanguage = Model.User.PageLanguage == CollectionManagement.Models.Enums.Language.Uzbek;
+            }
+            <label class="form-check-label text-light mt-2 me-2">UZ</label>
+            <div class="mt-2 me-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="localizer" @(isUzbekLanguage ? "" : "checked")>
+                    <label class="form-check-label text-light">EN</label>
+                </div>
             </div>
             <div class="mt-2 me-3">
-                @{
-                    var isDarkTheme = Model.User.PageTheme == CollectionManagement.Models.Enums.Theme.Dark;
-                }
                 <input type="checkbox" class="checkbox" id="checkbox" @(isDarkTheme ? "checked" : "")>
                 <label for="checkbox" class="checkbox-label">
                     <i class="bi bi-moon"></i>
@@ -25,15 +33,26 @@
                 </label>
             </div>
             <div class="d-flex me-4">
-                <div class="dropdown">
+                <div class="dropdown me-3">
                     <a class="nav-link text-white mt-2 dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         @Model.User.UserName
                     </a>
                     <div class="dropdown-menu me-5" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.ActionLink("Edit", "Profile", new {userId = Model.User.Id})" }">
+                            <i class="bi bi-gear-fill"></i>
+                            Account
+                        </a>
                         <a class="dropdown-item" href="@Url.ActionLink("Index", "Profile", new {userId = Model.User.Id})" }">
                             <i class="bi bi-person"></i>
-                            Profile
+                            Collections
                         </a>
+                        @if (Model.User.IsAdmin)
+                        {
+                            <a class="dropdown-item" href="@Url.ActionLink("Index", "Admin", new {userId = Model.User.Id})" }">
+                                <i class="bi bi-people"></i>
+                                Users
+                            </a>
+                        }
                         <a class="dropdown-item" href="@Url.Action("Index", "Home")">
                             <i class="bi bi-box-arrow-right"></i>
                             Log out
@@ -53,7 +72,7 @@
     var customFields = !string.IsNullOrEmpty(Model.Collection.CustomFields)
         ? JObject.Parse(Model.Collection.CustomFields)
         : null;
-    string? imageUrl = Model.Collection.ImageURL!.Contains("default.png") ? "You have not uploaded image yet" : Model.Collection.ImageURL.Substring(57);
+    string? imageUrl = Model.Collection.ImageURL!.Contains("default.png") ? "You have not uploaded image yet" : Model.Collection.ImageURL.Split('/')[^1];
 }
 
 
@@ -142,6 +161,27 @@
         $('form').on('submit', function () {
             const customFieldsData = JSON.stringify(customFields);
             $('#customFieldsData').val(customFieldsData);
+        });
+    });
+
+    const localizer = document.getElementById("localizer");
+    localizer.addEventListener('change', () => {
+        const language = localizer.checked ? "English" : "Uzbek";
+
+        $.ajax({
+            url: '/UserPreference/EditLanguage',
+            type: 'POST',
+            data: { language: language, userId: '@Model.User.Id' },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    console.error('Failed to update language preference.');
+                }
+            },
+            error: function () {
+                console.error('Failed to update language preference.');
+            }
         });
     });
 

@@ -26,7 +26,13 @@ public class AdminController : Controller
 
         var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId);
         var users = await query.ToListAsync();
+        var usersCollections = await _context.Collections
+                    .Where(c => c.UserId == userId)
+                    .Select(c => c.Name)
+                    .ToListAsync();
 
+        ViewBag.Collections = usersCollections;
+        ViewBag.UserEmail = user!.Email;
         ViewBag.Search = search;
 
         return View(model: (user, users));
